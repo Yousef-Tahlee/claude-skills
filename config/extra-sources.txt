@@ -1,0 +1,6 @@
+# Extra skill locations to collect (one per line). A path can be a single skill
+# folder (contains SKILL.md) or a folder of skills. Missing paths are skipped.
+/opt/cu-desktop/skill
+/opt/node-tools/node_modules/playwright-core/lib/tools/skills
+~/.agents/skills
+~/.codex/skills

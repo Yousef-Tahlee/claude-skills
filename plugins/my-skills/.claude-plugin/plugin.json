@@ -1,0 +1,8 @@
+{
+  "name": "my-skills",
+  "version": "1.0.0",
+  "description": "Personal skills from my claude.ai account and ~/.claude/skills on my machines.",
+  "author": {
+    "name": "Yousef Tahlee"
+  }
+}

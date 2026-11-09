@@ -1,0 +1,8 @@
+{
+  "name": "system-tools",
+  "version": "1.0.0",
+  "description": "Tooling skills that ship with the environment (playwright, desktop computer use...).",
+  "author": {
+    "name": "Yousef Tahlee"
+  }
+}

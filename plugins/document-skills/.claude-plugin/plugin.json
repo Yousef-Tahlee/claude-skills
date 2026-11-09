@@ -1,0 +1,8 @@
+{
+  "name": "document-skills",
+  "version": "1.0.0",
+  "description": "Core Anthropic skills (docx, pdf, pptx, xlsx, file reading, frontend design...).",
+  "author": {
+    "name": "Yousef Tahlee"
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "name": "claude-skills",
+  "owner": {
+    "name": "Yousef Tahlee"
+  },
+  "metadata": {
+    "description": "Every Claude skill I use, in one marketplace.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "brand-voice",
+      "source": "./plugins/brand-voice",
+      "description": "Brand Voice transforms scattered brand materials into enforceable AI guardrails — automatically. It searches across Notion, Google Drive, Confluence, Gong, Slack, and meeting transcripts to distill your strongest brand signals into a single source of truth, then applies them to every piece of AI-gen",
+      "version": "1.1.0",
+      "author": {
+        "name": "Tribe AI"
+      },
+      "category": "marketing"
+    },
+    {
+      "name": "cowork-plugin-management",
+      "source": "./plugins/cowork-plugin-management",
+      "description": "Create, customize, and manage plugins tailored to your organization's tools and workflows. Configure MCP servers, adjust plugin behavior, and adapt templates to match how your team works.",
+      "version": "0.2.2",
+      "author": {
+        "name": "Anthropic"
+      },
+      "category": "tooling"
+    },
+    {
+      "name": "data",
+      "source": "./plugins/data",
+      "description": "Write SQL, explore datasets, and generate insights faster. Build visualizations and dashboards, and turn raw data into clear stories for stakeholders.",
+      "version": "1.1.0",
+      "author": {
+        "name": "Anthropic"
+      },
+      "category": "data"
+    },
+    {
+      "name": "design",
+      "source": "./plugins/design",
+      "description": "Accelerate design workflows — critique, design system management, UX writing, accessibility audits, research synthesis, and dev handoff. From exploration to pixel-perfect specs.",
+      "version": "1.2.0",
+      "author": {
+        "name": "Anthropic"
+      },
+      "category": "design"
+    },
+    {
+      "name": "document-skills",
+      "source": "./plugins/document-skills",
+      "description": "Core Anthropic skills (docx, pdf, pptx, xlsx, file reading, frontend design...).",
+      "version": "1.0.0",
+      "author": {
+        "name": "Yousef Tahlee"
+      },
+      "category": "documents"
+    },
+    {
+      "name": "engineering",
+      "source": "./plugins/engineering",
+      "description": "Streamline engineering workflows — standups, code review, architecture decisions, incident response, and technical documentation. Works with your existing tools or standalone.",
+      "version": "1.2.0",
+      "author": {
+        "name": "Anthropic"
+      },
+      "category": "engineering"
+    },
+    {
+      "name": "example-skills",
+      "source": "./plugins/example-skills",
+      "description": "Anthropic example skills available in Claude (skill-creator, mcp-builder, canvas-design...).",
+      "version": "1.0.0",
+      "author": {
+        "name": "Yousef Tahlee"
+      },
+      "category": "examples"
+    },
+    {
+      "name": "marketing",
+      "source": "./plugins/marketing",
+      "description": "Create content, plan campaigns, and analyze performance across marketing channels. Maintain brand voice consistency, track competitors, and report on what's working.",
+      "version": "1.2.0",
+      "author": {
+        "name": "Anthropic"
+      },
+      "category": "marketing"
+    },
+    {
+      "name": "my-skills",
+      "source": "./plugins/my-skills",
+      "description": "Personal skills from my claude.ai account and ~/.claude/skills on my machines.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Yousef Tahlee"
+      },
+      "category": "personal"
+    },
+    {
+      "name": "system-tools",
+      "source": "./plugins/system-tools",
+      "description": "Tooling skills that ship with the environment (playwright, desktop computer use...).",
+      "version": "1.0.0",
+      "author": {
+        "name": "Yousef Tahlee"
+      },
+      "category": "tooling"
+    },
+    {
+      "name": "zapier",
+      "source": "./plugins/zapier",
+      "description": "Connect 9,000+ apps to your AI workflow. Discover, enable, and execute Zapier actions directly from your client.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Zapier",
+        "email": "support@zapier.com"
+      },
+      "category": "automation"
+    }
+  ]
+}
