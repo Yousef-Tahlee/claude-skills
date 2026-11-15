@@ -123,6 +123,42 @@ def plugin_name_of(plugin_dir: Path) -> str:
         return plugin_dir.name
 
 
+# ---------------------------------------------------------------- restricted
+# Skills whose LICENSE forbids copying/distributing them outside Claude are never
+# copied into the repo. They are only *listed* (config/builtin-only.json) as
+# "built into Claude".
+BUILTIN_ONLY_FILE = REPO / "config" / "builtin-only.json"
+RESTRICTED: dict = {}
+
+
+def is_restricted(skill_dir: Path) -> bool:
+    for lic in skill_dir.glob("LICENSE*"):
+        t = lic.read_text(errors="replace")
+        if "All rights reserved" in t and ("may not" in t or "Distribute" in t):
+            return True
+    return False
+
+
+def record_restricted(d: Path, group: str, changes: list):
+    fm = frontmatter(d / "SKILL.md")
+    RESTRICTED[d.name] = {"name": fm.get("name") or d.name, "group": group,
+                          "description": fm.get("description", "")}
+    dst = PLUGINS / group / "skills" / d.name
+    if dst.exists():
+        shutil.rmtree(dst)
+        changes.append(("removed", f"{group}/{d.name} (license: built-in only)"))
+
+
+def save_restricted():
+    old = {}
+    if BUILTIN_ONLY_FILE.exists():
+        old = json.loads(BUILTIN_ONLY_FILE.read_text())
+    for k, v in RESTRICTED.items():
+        old.setdefault(k, v)
+    BUILTIN_ONLY_FILE.write_text(json.dumps(dict(sorted(old.items())), indent=2, ensure_ascii=False) + "\n")
+    return old
+
+
 # ---------------------------------------------------------------- collectors
 def collect_skill_dir(root: Path, group: str, changes: list, seen: dict):
     """Every child of `root` that contains SKILL.md becomes plugins/<group>/skills/<name>."""
@@ -132,6 +168,9 @@ def collect_skill_dir(root: Path, group: str, changes: list, seen: dict):
         if not (d / "SKILL.md").is_file():
             continue
         name = d.name
+        if is_restricted(d):
+            record_restricted(d, group, changes)
+            continue
         dst = PLUGINS / group / "skills" / name
         key = (group, name)
         if key in seen and seen[key] != d:
@@ -230,7 +269,9 @@ def build_catalog() -> dict:
             "category": CATEGORY_OF.get(pdir.name, "other"),
             "skills": skills,
         })
-    return {"total_skills": sum(len(p["skills"]) for p in plugins), "plugins": plugins}
+    builtin = save_restricted()
+    return {"total_skills": sum(len(p["skills"]) for p in plugins), "plugins": plugins,
+            "builtin_only": builtin}
 
 
 def write_marketplace(cat: dict):
@@ -276,6 +317,12 @@ def write_catalog_md(cat: dict):
                   "| Skill | Description |", "|---|---|"]
         for s in p["skills"]:
             lines.append(f"| [`{s['name']}`]({s['path']}/SKILL.md) | {short(s['description'])} |")
+    if cat.get("builtin_only"):
+        lines += ["", "## Built into Claude (not redistributable)", "",
+                  "Their license forbids copying them outside Claude, so only their names are listed.",
+                  "Everyone with Claude already has them.", "", "| Skill | Description |", "|---|---|"]
+        for k, v in cat["builtin_only"].items():
+            lines.append(f"| `{v['name']}` | {short(v['description'])} |")
     (REPO / "CATALOG.md").write_text("\n".join(lines) + "\n")
     (REPO / "catalog.json").write_text(json.dumps(cat, indent=2, ensure_ascii=False) + "\n")
 
