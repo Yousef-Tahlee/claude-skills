@@ -227,10 +227,10 @@ Everyone with Claude already has them.
 
 | Skill | Description |
 |---|---|
+| `artifact-emulator` | See a page, slide deck or design canvas artifact you made, close to how a person will see it: open its files in the real artifact viewer in… |
 | `built-in-browser` | Read this skill before the first step that uses the built-in browser, the browser pane inside the Claude desktop app (also called the in-ap… |
 | `chrome-browser` | Read this skill before the first step that uses Claude in Chrome, the browser extension whose tools are named mcp__claude-in-chrome__* (als… |
 | `computer-use` | Read this skill before the first step of any request to do something in an app on the person's own computer (Notes, Finder, System Settings… |
 | `file-reading` | Use this skill when a file has been uploaded but its content is NOT in your context — only its path at /mnt/user-data/uploads/ is listed in… |
 | `pdf-reading` | Use this skill when you need to read, inspect, or extract content from PDF files — especially when file content is NOT in your context and… |
-| `artifact-emulator` | See a page, slide deck or design canvas artifact you made, close to how a person will see it: open its files in the real artifact viewer in… |
 | `video-making` | Use this skill before making a new video. Not for editing a video file the user supplied. |

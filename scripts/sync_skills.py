@@ -374,6 +374,11 @@ def main():
     cat = build_catalog()
     write_marketplace(cat)
     write_catalog_md(cat)
+    subprocess.run([sys.executable, str(REPO / "scripts" / "build_zips.py")],
+                   capture_output=True, check=False)  # refresh downloads/*.zip
+    r = subprocess.run([sys.executable, str(REPO / "scripts" / "build_guide.py")],
+                       capture_output=True, text=True, check=False)  # refresh SKILLS-GUIDE.md
+    log(r.stdout.strip())
     log(f"Total: {cat['total_skills']} skills in {len(cat['plugins'])} plugins.")
     if a.push or a.commit:
         try:

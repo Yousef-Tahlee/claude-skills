@@ -3,7 +3,9 @@
 Every Claude skill I use, collected in one place and packaged as a **Claude Code plugin marketplace**.
 It is kept in sync automatically from all my machines and my claude.ai account.
 
-> **113 skills · 11 plugins.** Full list: [CATALOG.md](CATALOG.md) (generated automatically).
+> **110 skills.** 103 downloadable in 11 plugins, plus 7 built into Claude.
+> 📘 **[SKILLS-GUIDE.md](SKILLS-GUIDE.md)**: every skill with a short Arabic description and a direct download link.
+> Technical index: [CATALOG.md](CATALOG.md). Both files are generated automatically.
 
 ---
 
@@ -20,7 +22,7 @@ It is kept in sync automatically from all my machines and my claude.ai account.
   /plugin install my-skills@claude-skills
   ```
   أو بتنزّلهم كلهم كملفات: `bash scripts/install.sh`
-- **لـ claude.ai أو تطبيق الديسكتوب:** شغّل `python3 scripts/build_zips.py`، وكل skill بتطلع ملف zip بمجلد `dist/`، ارفعه من Settings ← Capabilities ← Skills.
+- **لـ claude.ai أو تطبيق الديسكتوب:** نزّل ملف الـ zip تبع الـ skill من [SKILLS-GUIDE.md](SKILLS-GUIDE.md) وارفعه من Settings ← Capabilities ← Skills.
 - **التزامن التلقائي:** على كل جهاز شغّل مرة وحدة بس:
   ```
   bash setup/install-auto-sync.sh
@@ -52,7 +54,8 @@ claude-skills/
 ├── scripts/
 │   ├── sync_skills.py      # collect every skill on this machine → repo, regenerate catalog, push
 │   ├── install.sh          # copy all skills into ~/.claude/skills
-│   ├── build_zips.py       # one zip per skill for claude.ai upload
+│   ├── build_zips.py       # one zip per skill → downloads/ (direct download links)
+│   ├── build_guide.py      # SKILLS-GUIDE.md (Arabic descriptions from config/descriptions-ar.json)
 │   └── validate.py         # front-matter + catalog checks (run in CI)
 ├── setup/
 │   ├── install-auto-sync.sh  # one-time per machine: hook + CLAUDE.md standing instruction

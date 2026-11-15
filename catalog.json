@@ -754,6 +754,11 @@
     }
   ],
   "builtin_only": {
+    "artifact-emulator": {
+      "name": "artifact-emulator",
+      "group": "example-skills",
+      "description": "See a page, slide deck or design canvas artifact you made, close to how a person will see it: open its files in the real artifact viewer inside this cloud session, then screenshot it and read its console errors with a short Python Playwright script. Use it when the person asks to see or check how it looks, or when the artifact type's own instructions tell you to check. Where a type's instructions say not to check unless asked, they win. Never a step before saving or publishing, nor a routine after every save. Not for web apps or pages that are not artifacts. Cloud sessions only (built for cloud Cowork): elsewhere its script stops with a one-line reason. Only you see the result."
+    },
     "built-in-browser": {
       "name": "built-in-browser",
       "group": "example-skills",
@@ -778,11 +783,6 @@
       "name": "pdf-reading",
       "group": "document-skills",
       "description": "Use this skill when you need to read, inspect, or extract content from PDF files — especially when file content is NOT in your context and you need to read it from disk. Covers content inventory, text extraction, page rasterization for visual inspection, embedded image/attachment/table/form-field extraction, and choosing the right reading strategy for different document types (text-heavy, scanned, slide-decks, forms, data-heavy). Do NOT use this skill for PDF creation, form filling, merging, splitting, watermarking, or encryption — use the pdf skill instead."
-    },
-    "artifact-emulator": {
-      "name": "artifact-emulator",
-      "group": "example-skills",
-      "description": "See a page, slide deck or design canvas artifact you made, close to how a person will see it: open its files in the real artifact viewer inside this cloud session, then screenshot it and read its console errors with a short Python Playwright script. Use it when the person asks to see or check how it looks, or when the artifact type's own instructions tell you to check. Where a type's instructions say not to check unless asked, they win. Never a step before saving or publishing, nor a routine after every save. Not for web apps or pages that are not artifacts. Cloud sessions only (built for cloud Cowork): elsewhere its script stops with a one-line reason. Only you see the result."
     },
     "video-making": {
       "name": "video-making",

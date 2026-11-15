@@ -9,7 +9,10 @@ skill-creator), you must upload it to that repo yourself without being asked:
 
 1. `cd ~/claude-skills` (clone `https://github.com/Yousef-Tahlee/claude-skills` there if it is missing)
 2. `python3 scripts/sync_skills.py --push`
-3. Tell me in one line which skills were added or updated.
+3. For every new skill, add a one-line description in Syrian Arabic to
+   `config/descriptions-ar.json` (key `<plugin>/<skill-folder>`), run
+   `python3 scripts/build_guide.py`, then commit and push again.
+4. Tell me in one line which skills were added or updated.
 
 If the skill lives somewhere the script does not scan, add that folder to
 `config/extra-sources.txt` first, then run step 2. Never delete skills from the repo.
