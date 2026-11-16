@@ -29,7 +29,8 @@ Say "`n=== Full backup of $pc -> Claude-archive/devices/$pc ===`n"
 $extra = $env:BACKUP_EXTRA   # optional; folders are discovered automatically (see step 5)
 
 # ---- 1. Clone the archive repo (GitHub login window may open: sign in as Yousef-Tahlee) ----
-if (Test-Path (Join-Path $work ".git")) { git -C $work pull --rebase } else { git clone --depth 1 $Repo $work }
+git config --global core.longpaths true 2>$null
+if (Test-Path (Join-Path $work ".git")) { git -C $work -c core.longpaths=true pull --rebase --autostash } else { git -c core.longpaths=true clone --depth 1 $Repo $work }
 if (-not (Test-Path (Join-Path $work ".git"))) { Say "Could not clone. Sign in to GitHub with an account that has access to Claude-archive." Red; return }
 $dst = Join-Path $work "devices\$pc"
 New-Item -ItemType Directory -Force $dst | Out-Null
@@ -136,18 +137,25 @@ $files | Where-Object { $_.Length -gt 95MB } | ForEach-Object {
   $rel = $_.FullName.Substring($work.Length + 1) -replace "\\","/"
   git lfs track --filename "$rel" 2>$null | Out-Null; if ($LASTEXITCODE -ne 0) { git lfs track "$rel" | Out-Null }
 }
+git config core.longpaths true          # Windows: allow paths > 260 chars (Claude chats have long names)
+git config core.autocrlf false
 git add .gitattributes 2>$null
 git config user.name  "$env:USERNAME"
 git config user.email "Yousef-Tahlee@users.noreply.github.com"
 git config http.postBuffer 524288000
 $failed = @()
 foreach ($part in Get-ChildItem $dst -Force) {
-  git add -- "$($part.FullName)" 2>$null
+  Say "Adding $($part.Name) ..."
+  git add --ignore-errors -A -- "$($part.FullName)" 2>&1 | Select-String -Pattern "error|fatal|warning: could not" | Select-Object -First 5 | Out-Host
   git commit -q -m "Backup $pc : $($part.Name)" 2>$null
   git push origin HEAD 2>&1 | Out-Host
   if ($LASTEXITCODE -ne 0) { $failed += $part.Name }
 }
+$onGit = (git ls-tree -r --name-only origin/HEAD -- "devices/$pc" 2>$null | Measure-Object).Count
+$local = (Get-ChildItem $dst -Recurse -File -Force | Measure-Object).Count
+Say "Check: $onGit of $local files are on GitHub." Yellow
 Pop-Location
+if ($onGit -lt $local) { $failed += "some files ($($local - $onGit) missing) - run the same command again" }
 if ($failed.Count) {
   Say "`nSome parts did not push: $($failed -join ', ')" Red
   Say "They are committed locally in $work. Run 'git -C `"$work`" push' again later, or zip that folder to Google Drive." Yellow
