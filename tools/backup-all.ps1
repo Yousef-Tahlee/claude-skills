@@ -161,10 +161,20 @@ foreach ($part in Get-ChildItem $dst -Force) {
   Say "Adding $($part.Name) ..."
   git add --ignore-errors -A -- "$($part.FullName)" 2>&1 | Select-String -Pattern "error|fatal|warning: could not" | Select-Object -First 5 | Out-Host
   git commit -q -m "Backup $pc : $($part.Name)" 2>$null
-  git push origin HEAD 2>&1 | Out-Host
-  if ($LASTEXITCODE -ne 0) { $failed += $part.Name }
+  # the other PC may push at the same time: get its commits, then push again (each PC writes its own folder, no conflicts)
+  $ok = $false
+  for ($i = 1; $i -le 6 -and -not $ok; $i++) {
+    git push -q origin HEAD:main 2>$null
+    if ($LASTEXITCODE -eq 0) { $ok = $true; Say "  pushed $($part.Name)" Green }
+    else { Say "  other PC pushed meanwhile, syncing (try $i)..." Yellow
+           git fetch -q --depth=1 origin main 2>$null; git rebase -q origin/main 2>$null
+           if ($LASTEXITCODE -ne 0) { git rebase --abort 2>$null; git pull -q --rebase -X theirs origin main 2>$null }
+           Start-Sleep -Seconds (3 * $i) }
+  }
+  if (-not $ok) { $failed += $part.Name }
 }
-$onGit = (git ls-tree -r --name-only origin/HEAD -- "devices/$pc" 2>$null | Measure-Object).Count
+git fetch -q --depth=1 origin main 2>$null
+$onGit = (git ls-tree -r --name-only origin/main -- "devices/$pc" 2>$null | Measure-Object).Count
 $local = (Get-ChildItem $dst -Recurse -File -Force | Measure-Object).Count
 Say "Check: $onGit of $local files are on GitHub." Yellow
 Pop-Location

@@ -29,8 +29,9 @@ git config core.longpaths true
 git config user.email "Yousef-Tahlee@users.noreply.github.com"
 git add -A -- claude-ai-export .gitattributes
 git commit -q -m "claude.ai data export ($((Get-Date).ToString('yyyy-MM-dd')))"
-git push origin HEAD
-$onGit = (git ls-tree -r --name-only origin/HEAD -- claude-ai-export | Measure-Object).Count
+for ($i=1; $i -le 6; $i++) { git push -q origin HEAD:main 2>$null; if ($LASTEXITCODE -eq 0) { break }; git fetch -q --depth=1 origin main; git rebase -q origin/main; Start-Sleep 3 }
+git fetch -q --depth=1 origin main
+$onGit = (git ls-tree -r --name-only origin/main -- claude-ai-export | Measure-Object).Count
 $local = (Get-ChildItem $dst -Recurse -File | Measure-Object).Count
 Pop-Location
 Say "Check: $onGit of $local files are on GitHub." Yellow
