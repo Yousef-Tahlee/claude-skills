@@ -30,14 +30,19 @@ $extra = $env:BACKUP_EXTRA   # optional; folders are discovered automatically (s
 
 # ---- 1. Clone the archive repo (GitHub login window may open: sign in as Yousef-Tahlee) ----
 git config --global core.longpaths true 2>$null
-if (Test-Path (Join-Path $work ".git")) { git -C $work -c core.longpaths=true pull --rebase --autostash } else { git -c core.longpaths=true clone --depth 1 $Repo $work }
+if (Test-Path $work) { Say "Cleaning previous attempt..." Yellow; cmd /c "rmdir /s /q `"$work`"" }
+git -c core.longpaths=true clone --depth 1 $Repo $work
 if (-not (Test-Path (Join-Path $work ".git"))) { Say "Could not clone. Sign in to GitHub with an account that has access to Claude-archive." Red; return }
 $dst = Join-Path $work "devices\$pc"
 New-Item -ItemType Directory -Force $dst | Out-Null
-$XD = @("node_modules",".venv","venv","__pycache__",".git")
+$XD = @("node_modules",".venv","venv","__pycache__",".git",".next","dist-electron","Cache","Code Cache","GPUCache")
+$MaxBytes = 25MB   # GitHub free: no LFS needed, repo stays pushable. Bigger files go to BIG-FILES.md (copy them to Google Drive)
+$big = New-Object System.Collections.ArrayList
 function Copy-Tree($src, $to) {
   if (-not (Test-Path $src)) { return $false }
-  robocopy $src $to /E /R:1 /W:1 /XD $XD /XJ /NFL /NDL /NJH /NJS /NP | Out-Null
+  robocopy $src $to /E /R:1 /W:1 /XD $XD /XJ /MAX:$MaxBytes /NFL /NDL /NJH /NJS /NP | Out-Null
+  Get-ChildItem $src -Recurse -File -Force -ErrorAction SilentlyContinue | Where-Object { $_.Length -gt $MaxBytes -and $_.FullName -notmatch "\\(node_modules|\.git|\.venv)\\" } |
+    ForEach-Object { [void]$big.Add(("{0,9:N0} MB  {1}" -f ($_.Length/1MB), $_.FullName)) }
   # keep each nested git repo's full history as a bundle
   Get-ChildItem $src -Directory -Recurse -Force -Filter ".git" -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -notmatch "node_modules" } | ForEach-Object {
@@ -95,7 +100,8 @@ $markers = @(".git","package.json","docker-compose.yml","compose.yaml","requirem
              "remotion.config.ts","remotion.config.js","manage.py","next.config.js","next.config.ts","index.html","Makefile")
 $markExt = @(".blend",".n8n",".prproj",".drp",".aep",".psd",".fig",".ai",".sketch")
 $nameRx  = "(?i)revo|rekick|n8n|remotion|claude|automation|landing|brand|workflow"
-$skipRx  = "(?i)\\(Windows|Program Files|Program Files \(x86\)|ProgramData|AppData|\$Recycle\.Bin|System Volume Information|node_modules|\.vscode|\.cursor|\.npm|\.nuget|\.cache|Recovery|PerfLogs|MSOCache|Intel|AMD|NVIDIA|Steam|SteamLibrary|Epic Games|claude-archive-backup)(\\|$)"
+$skipRx  = '(?i)\\(Windows|Program Files|Program Files \(x86\)|ProgramData|AppData|\$Recycle\.Bin|System Volume Information|node_modules|\.vscode|\.cursor|\.npm|\.nuget|\.cache|Recovery|PerfLogs|MSOCache|Intel|AMD|NVIDIA|Steam|SteamLibrary|Epic Games|Games|Adobe|Microsoft|Common Files|drivers|claude-archive-backup)(\\|$)'
+$userRoots = @("Desktop","Documents","Downloads","source","Projects","OneDrive","Pictures","Videos","Music") | ForEach-Object { (Join-Path $env:USERPROFILE $_).ToLower() }
 $roots = @()
 foreach ($u in "Desktop","Documents","Downloads","source","Projects","OneDrive") { $roots += (Join-Path $env:USERPROFILE $u) }
 $roots += $env:USERPROFILE
@@ -103,7 +109,7 @@ Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Root -ne "$env:SystemDriv
 function Find-Projects($dir, $depth) {
   if ($depth -gt 4 -or $dir -match $skipRx) { return }
   $items = Get-ChildItem $dir -Force -ErrorAction SilentlyContinue
-  $isProj = ($depth -ge 1) -and ($dir -ne $env:USERPROFILE) -and ($dir.Length -gt 3) -and (
+  $isProj = ($depth -ge 1) -and ($dir -ne $env:USERPROFILE) -and ($dir.Length -gt 3) -and ($userRoots -notcontains $dir.ToLower()) -and (
             ($items | Where-Object { $markers -contains $_.Name -or $markExt -contains $_.Extension.ToLower() }) -or
             ((Split-Path $dir -Leaf) -match $nameRx -and $depth -ge 1))
   if ($isProj) { $paths[$dir] = 1; return }
@@ -114,6 +120,7 @@ Say "Found $($paths.Count) folder(s)."
 $copied = @()
 foreach ($p in $paths.Keys) {
   if (-not (Test-Path $p) -or $p -eq $env:USERPROFILE -or $p.Length -le 3) { continue }
+  if ($p -match $skipRx -or $userRoots -contains $p.ToLower()) { continue }
   if (Copy-Tree $p (Join-Path $dst ("folders\" + (Safe $p)))) { $copied += $p; Say "[ok] $p" Green }
 }
 
@@ -133,10 +140,16 @@ $(($copied | ForEach-Object { "- ``$_``" }) -join "`n")
 
 # ---- 7. Large files -> LFS, then commit & push in parts ---------------------
 Push-Location $work
-$files | Where-Object { $_.Length -gt 95MB } | ForEach-Object {
-  $rel = $_.FullName.Substring($work.Length + 1) -replace "\\","/"
-  git lfs track --filename "$rel" 2>$null | Out-Null; if ($LASTEXITCODE -ne 0) { git lfs track "$rel" | Out-Null }
-}
+$bigTotal = 0; $big | ForEach-Object { $bigTotal += [double](($_ -split "MB")[0].Trim() -replace ",","") }
+@"
+# Big files NOT uploaded to GitHub (> 25 MB each): copy these to Google Drive / external disk
+Total: $("{0:N0}" -f $bigTotal) MB in $($big.Count) files
+
+``````
+$($big -join "`n")
+``````
+"@ | Set-Content (Join-Path $dst "BIG-FILES.md") -Encoding UTF8
+Say "$($big.Count) big files (> 25 MB, total $("{0:N0}" -f $bigTotal) MB) listed in BIG-FILES.md - copy them to Google Drive." Yellow
 git config core.longpaths true          # Windows: allow paths > 260 chars (Claude chats have long names)
 git config core.autocrlf false
 git add .gitattributes 2>$null
